@@ -1,6 +1,6 @@
 # LetsBelajar
 
-LetsBelajar is a collaborative study and assignment management platform built with Laravel. It enables students, teachers, and project members to organize assignments, coordinate tasks via Kanban boards, share files and folders, track deadlines using an interactive calendar, and receive real-time notifications. It also features an administrative panel to monitor user activity and manage accounts.
+LetsBelajar (also known as LetsBelajar) is a collaborative study and assignment management platform built with Laravel. It enables students, teachers, and project members to organize assignments, coordinate tasks via Kanban boards, share files and folders, track deadlines using an interactive calendar, and receive real-time notifications. It also features an administrative panel to monitor user activity and manage accounts.
 
 ## Features
 
@@ -33,36 +33,28 @@ Ensure you have the following installed on your system:
 
 ## Getting Started
 
-Follow these steps to set up the project locally:
+Choose one of the setup options below depending on your environment preference:
 
-### 1. Clone the Repository
+---
+
+### Option A: Setup using Docker (Laravel Sail)
+
+This option uses Docker containers for running the application, database, and auxiliary services like Mailpit.
+
+#### 1. Clone the Repository
 Clone the project to your local machine and navigate into the project directory:
 ```bash
 git clone <repository-url>
-cd jomstudy
+cd Lets-Belajar
 ```
 
-### 2. Install Dependencies
-Install PHP dependencies via Composer and frontend dependencies via NPM:
-```bash
-composer install
-npm install
-```
-
-### 3. Environment Configuration
-Copy the template environment file to create your own configuration:
+#### 2. Configure the Environment
+Copy the environment template file:
 ```bash
 copy .env.example .env
 ```
-Ensure you generate an application key:
-```bash
-php artisan key:generate
-```
-
-### 4. Database Setup
-Configure your database credentials in the .env file. If using the default Docker setup (Laravel Sail), configure your credentials or use the default Docker environment variables:
-```bash
-# Example for Docker Sail environment (.env.docker / .env)
+In your `.env` file, configure the database variables to match the Docker Sail configuration:
+```env
 DB_CONNECTION=mysql
 DB_HOST=mysql
 DB_PORT=3306
@@ -70,33 +62,101 @@ DB_DATABASE=letsbelajar
 DB_USERNAME=sail
 DB_PASSWORD=password
 ```
+
+#### 3. Install Dependencies
+Run a temporary Docker container to install composer dependencies without needing local PHP installed:
+```bash
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    laravelsail/php8.2-composer:latest \
+    composer install --ignore-platform-reqs
+```
+*(Alternatively, if you have Composer installed locally, simply run `composer install`)*
+
+Next, install frontend dependencies:
+```bash
+npm install
+```
+
+#### 4. Start the Application and Build Assets
+Start the containers in the background:
+```bash
+./vendor/bin/sail up -d
+```
+
+Generate the application key and run the migrations with seeders:
+```bash
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate --seed
+```
+
+Start the Vite dev server for compilation:
+```bash
+./vendor/bin/sail npm run dev
+```
+
+#### 5. Access the Platform
+- Application URL: http://localhost
+- Mailpit Dashboard: http://localhost:8025
+
+---
+
+### Option B: Setup without Docker (Local PHP & MySQL)
+
+This option runs the services directly on your host machine.
+
+#### 1. Clone the Repository
+Clone the project to your local machine and navigate into the project directory:
+```bash
+git clone <repository-url>
+cd jomstudy
+```
+
+#### 2. Install Dependencies
+Install PHP dependencies via Composer and frontend dependencies via NPM:
+```bash
+composer install
+npm install
+```
+
+#### 3. Configure the Environment
+Copy the environment template file:
+```bash
+copy .env.example .env
+```
+Generate the application key:
+```bash
+php artisan key:generate
+```
+
+#### 4. Database Setup
+Create a new MySQL database named `letsbelajar` (or matching your custom settings) on your local server.
+
+Update the `.env` file with your local database connection details:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=letsbelajar
+DB_USERNAME=root
+DB_PASSWORD=your_local_password
+```
+
 Run database migrations and seeders:
 ```bash
 php artisan migrate --seed
 ```
 
-### 5. Running the Application
-You can run the application using Laravel Sail or the local PHP development server:
-
-#### Using Laravel Sail (Docker)
-Start the containers in the background:
-```bash
-./vendor/bin/sail up -d
-```
-Then run the migration/seeding command within the container if you haven't done so:
-```bash
-./vendor/bin/sail artisan migrate --seed
-```
-
-#### Using Local PHP Development Server
+#### 5. Running the Application
 Start both the Laravel development server and Vite asset compiler using the helper composer script:
 ```bash
 composer run dev
 ```
 
-### 6. Accessing the Platform
-Open your browser and navigate to:
-- Application URL: http://localhost
-- Mailpit Dashboard (if running Sail): http://localhost:8025
+#### 6. Access the Platform
+- Application URL: http://localhost:8000
+- Vite Server: http://localhost:5173
 
 You can log in using the administrator account seeded during database setup, or register a new user account.
